@@ -45,11 +45,11 @@ def set_cycles(w=None, h=None,
         cycles.max_bounces = max_bounces
     if min_bounces is not None:
         cycles.min_bounces = min_bounces
-    cycles.caustics_reflective = False
-    cycles.caustics_refractive = False
+    cycles.caustics_reflective = True
+    cycles.caustics_refractive = True
     cycles.diffuse_bounces = 10
     cycles.glossy_bounces = 4
-    cycles.transmission_bounces = 4
+    cycles.transmission_bounces = 8
     cycles.volume_bounces = 0
     cycles.transparent_min_bounces = 8
     cycles.transparent_max_bounces = 64
@@ -57,15 +57,15 @@ def set_cycles(w=None, h=None,
     # Avoid grainy renderings (fireflies)
     world = bpy.data.worlds['World']
     world.cycles.sample_as_light = True
-    cycles.blur_glossy = 5
-    cycles.sample_clamp_indirect = 5
+    cycles.blur_glossy = 1.0
+    cycles.sample_clamp_indirect = 10.0
 
     # Ensure there's no background light emission
     world.use_nodes = True
-    try:
-        world.node_tree.nodes.remove(world.node_tree.nodes['Background'])
-    except KeyError:
-        pass
+    #try:
+    #    world.node_tree.nodes.remove(world.node_tree.nodes['Background'])
+    #except KeyError:
+    #    pass
 
     # If world background is transparent with premultiplied alpha
     if transp_bg is not None:

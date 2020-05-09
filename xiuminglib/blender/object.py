@@ -61,24 +61,24 @@ def remove_objects(name_pattern, regex=False):
 
         for obj in objs:
             if name_pattern.match(obj.name):
-                obj.select = True
+                obj.select_set(True)
                 removed.append(obj.name)
             else:
-                obj.select = False
+                obj.select_set(False)
 
     else:
         for obj in objs:
             if obj.name == name_pattern:
-                obj.select = True
+                obj.select_set(True)
                 removed.append(obj.name)
             else:
-                obj.select = False
+                obj.select_set(False)
 
     # Delete
     bpy.ops.object.delete()
 
     # Scene update necessary, as matrix_world is updated lazily
-    bpy.context.scene.update()
+    bpy.context.view_layer.update()
 
     logger.name = logger_name
     logger.info("Removed from scene: %s", removed)
@@ -115,7 +115,7 @@ def import_object(model_path,
 
     # Deselect all
     for o in bpy.data.objects:
-        o.select = False
+        o.select_set(False)
 
     # Import
     if model_path.endswith('.obj'):
@@ -155,7 +155,7 @@ def import_object(model_path,
         trans_4x4 = Matrix.Translation(trans_vec)
         rot_4x4 = Matrix(rot_mat).to_4x4()
         scale_4x4 = Matrix(np.eye(4)) # don't scale here
-        obj.matrix_world = trans_4x4 * rot_4x4 * scale_4x4
+        obj.matrix_world = trans_4x4 @ rot_4x4 @ scale_4x4
 
         # Scale
         obj.scale = (scale, scale, scale)
@@ -163,7 +163,7 @@ def import_object(model_path,
         obj_list.append(obj)
 
     # Scene update necessary, as matrix_world is updated lazily
-    bpy.context.scene.update()
+    bpy.context.view_layer.update()
 
     logger.name = logger_name
     logger.info("Imported: %s", model_path)

@@ -144,8 +144,8 @@ def point_camera_to(cam, xyz_target, up=(0, 0, 1)):
     # image plane. We know right now world +z, when projected, points up, so
     # we just need to rotate the camera around the lookat direction by an angle
     cam_mat, _, _ = get_camera_matrix(cam)
-    up_proj = cam_mat * up.to_4d()
-    orig_proj = cam_mat * Vector((0, 0, 0)).to_4d()
+    up_proj = cam_mat @ up.to_4d()
+    orig_proj = cam_mat @ Vector((0, 0, 0)).to_4d()
     try:
         up_proj = Vector((up_proj[0] / up_proj[2], up_proj[1] / up_proj[2])) - \
             Vector((orig_proj[0] / orig_proj[2], orig_proj[1] / orig_proj[2]))
@@ -306,7 +306,7 @@ def get_camera_matrix(cam, keep_disparity=False):
 
     # Necessary scene update
     scene = bpy.context.scene
-    scene.update()
+    bpy.context.view_layer.update()
 
     # Check if camera intrinsic parameters comptible with render settings
     if not intrinsics_compatible_with_scene(cam):
@@ -380,11 +380,11 @@ def get_camera_matrix(cam, keep_disparity=False):
 
     # World to Blender camera
     rotmat_world2cam = rot_euler.to_matrix().transposed() # same as inverse
-    t_world2cam = rotmat_world2cam * -t
+    t_world2cam = rotmat_world2cam @ -t
 
     # World to computer vision camera
-    rotmat_world2cv = rotmat_cam2cv * rotmat_world2cam
-    t_world2cv = rotmat_cam2cv * t_world2cam
+    rotmat_world2cv = rotmat_cam2cv @ rotmat_world2cam
+    t_world2cv = rotmat_cam2cv @ t_world2cam
 
     if keep_disparity:
         # 4-by-4
@@ -401,7 +401,7 @@ def get_camera_matrix(cam, keep_disparity=False):
             rotmat_world2cv[2][:] + (t_world2cv[2],)))
 
     # Camera matrix
-    cam_mat = int_mat * ext_mat
+    cam_mat = int_mat @ ext_mat
 
     logger.name = logger_name
     logger.info("Done computing camera matrix for '%s'", cam.name)
