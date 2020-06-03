@@ -15,7 +15,9 @@ bpy = preset_import('bpy')
 def set_cycles(w=None, h=None,
                n_samples=None, max_bounces=None, min_bounces=None,
                transp_bg=None,
-               color_mode=None, color_depth=None):
+               color_mode=None, color_depth=None,
+               use_gpu=False,
+               ):
     """Sets up Cycles as rendering engine.
 
     ``None`` means no change.
@@ -71,14 +73,15 @@ def set_cycles(w=None, h=None,
     if transp_bg is not None:
         cycles.film_transparent = transp_bg
 
-    # # Use GPU
-    # bpy.context.user_preferences.system.compute_device_type = 'CUDA'
-    # bpy.context.user_preferences.system.compute_device = \
-    # 'CUDA_' + str(randint(0, 3))
-    # scene.cycles.device = 'GPU'
+    # Use GPU
+    if use_gpu:
+        bpy.context.user_preferences.system.compute_device_type = 'CUDA'
+        bpy.context.user_preferences.system.compute_device = \
+        'CUDA_' + str(randint(0, 3))
+        scene.cycles.device = 'GPU'
 
-    scene.render.tile_x = 16 # 256 optimal for GPU
-    scene.render.tile_y = 16 # 256 optimal for GPU
+    scene.render.tile_x = 256 if use_gpu else 16
+    scene.render.tile_y = 256 if use_gpu else 16
     if w is not None:
         scene.render.resolution_x = w
     if h is not None:
@@ -421,8 +424,8 @@ def render_alpha(outpath, cam=None, obj_names=None, samples=1000):
     cam_name, obj_names, scene, outnode = _render_prepare(cam, obj_names)
 
     scene.render.engine = 'CYCLES'
-    film_transparent_old = scene.cycles.film_transparent
-    scene.cycles.film_transparent = True
+    film_transparent_old = scene.render.film_transparent
+    scene.render.film_transparent = True
     # Anti-aliased edges are built up by averaging multiple samples
     samples_old = scene.cycles.samples
     scene.cycles.samples = samples
