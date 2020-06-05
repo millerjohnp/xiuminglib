@@ -85,7 +85,7 @@ def remove_objects(name_pattern, regex=False):
 
 
 def import_object(model_path,
-                  axis_forward='-Z', axis_up='Y',
+                  axis_forward='-Y', axis_up='Z',
                   rot_mat=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
                   trans_vec=(0, 0, 0),
                   scale=1,
