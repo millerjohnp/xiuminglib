@@ -1,5 +1,6 @@
 from os.path import abspath, dirname, join
 from glob import glob
+from random import randint
 from shutil import move
 from time import time
 
@@ -74,11 +75,15 @@ def set_cycles(w=None, h=None,
         cycles.film_transparent = transp_bg
 
     # Use GPU
+    # https://blender.stackexchange.com/questions/156503/rendering-on-command-line-with-gpu
     if use_gpu:
-        bpy.context.user_preferences.system.compute_device_type = 'CUDA'
-        bpy.context.user_preferences.system.compute_device = \
-        'CUDA_' + str(randint(0, 3))
-        scene.cycles.device = 'GPU'
+        preferences = bpy.context.preferences
+        cycles_preferences = preferences.addons["cycles"].preferences
+        cuda_devices, _ = cycles_preferences.get_devices()
+        for device in cuda_devices:
+            device.use = True
+        cycles_preferences.compute_device_type = "CUDA"
+        bpy.context.scene.cycles.device = "GPU"
 
     scene.render.tile_x = 256 if use_gpu else 16
     scene.render.tile_y = 256 if use_gpu else 16
